@@ -132,7 +132,7 @@
         </div>
       </div>
       <div class="modal fade" id="modal-search-room" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="false">
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content custom-modal-content">
             <div class="modal-header">
@@ -172,12 +172,15 @@
                           <span>&#9733;</span>
                           <span>&#9733;</span>
                           <span>&#9733;</span> -->
+                        <img class="result-turn" />
+                        <img class="result-turn" />
+                        <img class="result-turn" />
                       </div>
                     </div>
                   </div>
                 </div>
                 <div class='header-game-center'>
-                  <span class='round text-white'>
+                  <span class='text-white'>
                     ROUND 1
                   </span>
                   <span class="turn text-white"></span>
@@ -189,6 +192,9 @@
                     <div class='game-user-info'>
                       <div class='game-user-name'>Player 1</div>
                       <div class='game-user-score'>
+                        <img class="result-turn" />
+                        <img class="result-turn" />
+                        <img class="result-turn" />
                         <!-- <span>&#9733;</span>
                           <span>&#9733;</span>
                           <span>&#9733;</span>
@@ -236,8 +242,7 @@
         </div>
       </div>
 
-      <div class="modal fade" id="modal-end-round" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="false">
+      <div class="modal fade" id="modal-end-round" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content custom-modal-content">
             <div class='form-create-room'>
@@ -247,14 +252,50 @@
         </div>
       </div>
       <div class="modal-notification show">
-
+        <div class="modal fade" id="modal-end-round" tabindex="-1" aria-labelledby="exampleModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content custom-modal-content">
+              <div class='form-create-room'>
+                <div class='end-round'></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-notification show">
+        </div>
+        <div class="modal fade" id="modal-extra-game" tabindex="-1" aria-labelledby="exampleModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Extra Game</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="imgs">
+                  <img class="face" src="./assets/images/head_coin.png" alt="">
+                  <img class="back" src="./assets/images/tais_coin.png" alt="">
+                </div>
+                <div class="scores">
+                  <span class="faceS"></span>
+                  <span class="backS"></span>
+                </div>
+                <!-- <div class="options">
+                  <button class="flip">Flip Coin</button>
+                  <button class="reset">Reset</button>
+                </div> -->
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <script src="/mezon-sdk.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-      crossorigin="anonymous"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="./assets/javascript/client.js"></script>
+      <script src="/mezon-game/public/mezon-sdk.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+      <script src="/socket.io/socket.io.js"></script>
+      <script src="./assets/javascript/client.js"></script>
 </body>
+
 </html>

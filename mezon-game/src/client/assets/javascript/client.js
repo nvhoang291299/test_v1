@@ -27,6 +27,7 @@ const generateUser = () => {
     userId: userId,
     name: "User " + userId,
     avatar: "https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg",
+    userCoin: 1000,
   };
 };
 const user = generateUser();
@@ -125,56 +126,62 @@ socket.on("joinRoomError", (message) => {
 socket.emit("listRooms");
 socket.on("listRooms", (rooms) => {
   renderListRoom(rooms);
-  console.log("List rooms:", rooms);
 });
 
 const renderCurrentRoomInfo = (roomInfo) => {
   const roomMemberElement = document.querySelector(".game-members");
   roomMemberElement.innerHTML = "";
   const maxMember = roomInfo.roomInfo.roomMaxUser;
-  let owner = roomInfo.roomInfo.owner;
-  const coinText = document.querySelector('.coin-text');
-  coinText.innerHTML = roomInfo.roomInfo.roomBet;
+  const owner = roomInfo.roomInfo.owner;
+  // const coinText = document.querySelector(".coin-text");
+  // coinText.innerHTML = roomInfo.roomInfo.roomBet;
+  const roomMembers = roomInfo.roomMember;
+
   Array.from({ length: maxMember }).forEach((_, index) => {
     const memberElement = document.createElement("div");
     memberElement.classList.add("game-member-item");
+    const member = roomMembers?.[index];
     memberElement.innerHTML = `
       <img class='member-avatar' src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="">
-      <span class='member-name'>Waiting...</span>
+      <span class='member-name'>${member?.name ?? "Waiting..."}</span>
     `;
     roomMemberElement.appendChild(memberElement);
   });
-  const startGameButtonElement = document.querySelector(".btn-start-game")
-  if (owner == user.userId) {
-    startGameButtonElement.addEventListener("click", () => {
-      startGame(user.userId, roomInfo.roomInfo.roomId);
-    });
-  } else {
-    startGameButtonElement.innerHTML = 'Waiting';
-    startGameButtonElement.disabled = true;
-  }
 
+  const startGameButtonElement = document.querySelector(".btn-start-game");
+  const handleStartGame = () => {
+    startGame(user.userId, roomInfo.roomInfo.roomId);
+  };
+
+  startGameButtonElement.replaceWith(startGameButtonElement.cloneNode(true));
+  const newStartGameButton = document.querySelector(".btn-start-game");
+
+  if (user.userId === owner) {
+    newStartGameButton.addEventListener("click", handleStartGame);
+    newStartGameButton.innerHTML = "START";
+    newStartGameButton.disabled = false;
+  } else {
+    newStartGameButton.innerHTML = "Waiting";
+    newStartGameButton.disabled = true;
+  }
 };
+
 socket.on("currentRoom", (roomInfo) => {
   renderCurrentRoomInfo(roomInfo);
 });
 
 const renderRoomMembers = (members) => {
   const gameMemberItems = document.querySelectorAll(".game-member-item");
-  members.forEach((member, index) => {
-    const memberElement = gameMemberItems[index];
-    if (!memberElement) {
-      return;
-    }
-    memberElement.innerHTML = `
+  gameMemberItems.forEach((gameMemberItem, index) => {
+    const member = members[index];
+    gameMemberItem.innerHTML = `
       <img class='member-avatar' src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="">
-      <span class='member-name'>${member?.name}</span>
+      <span class='member-name'>${member?.name ?? "Waiting"}</span>
     `;
   });
 };
 socket.on("roomMembers", (members) => {
   renderRoomMembers(members);
-  console.log("Room members:", members);
 });
 
 const renderListUser = (listUsers) => {
@@ -198,16 +205,17 @@ const renderListUser = (listUsers) => {
 socket.emit("listUsers");
 socket.on("listUsers", (users) => {
   renderListUser(users);
-  console.log("List users:", users);
 });
 
 const renderUserInfo = (userInfo) => {
   const userInfoElement = document.querySelector(".account-box");
+  const coinText = document.querySelector(".coin-text");
 
   if (!userInfoElement) {
     console.error("Element with class 'account-box' not found.");
     return;
   }
+  coinText.innerHTML = userInfo?.userCoin;
 
   userInfoElement.innerHTML = `
     <div class="avatar">
@@ -218,8 +226,11 @@ const renderUserInfo = (userInfo) => {
     </div>
   `;
 };
-renderUserInfo(user);
 
+socket.on("userInfo", (userInfo) => {
+  console.log(userInfo);
+  renderUserInfo(userInfo);
+});
 // start game
 const startGame = (userId, roomId) => {
   socket.emit("startGame", {
@@ -231,9 +242,18 @@ socket.on("startGameError", (message) => {
   alert(message);
 });
 
+socket.on("startBet", (data) => {
+  user.userCoin = user.userCoin - data;
+  renderUserInfo(user);
+});
+
+socket.on("endBet", (data) => {
+  console.log("endBet", data);
+  user.userCoin = user.userCoin + data;
+  renderUserInfo(user);
+});
+
 const renderCurrentRoundInfo = (roundInfo) => {
-  console.log('roundInfo:', roundInfo);
-  
   const headerGameLeftElement = document.querySelector(".header-game-left");
   const headerGameRightElement = document.querySelector(".header-game-right");
 
@@ -275,7 +295,6 @@ function startCountdown(countdown = 9) {
     countdown--;
 
     if (countdown < 0) {
-      console.log("Stopping interval");
       clearInterval(countdownInterval);
       countdownArea.innerHTML = `00`;
     }
@@ -293,10 +312,70 @@ const chooseOption = (option) => {
   choosedOption = option;
 };
 
+// ----- Extra Game -----
+socket.on("extraGame", (data) => {
+  console.log('extraGame info:', data);
+  const modalExtraGame = document.getElementById("modal-extra-game");
+  const imgs = document.querySelector('.imgs');
+  const faceS = document.querySelector('.faceS');
+  const backS = document.querySelector('.backS');
+  if (!modalExtraGame.classList.contains("show")) {
+    const modal = new bootstrap.Modal(modalExtraGame);
+    modal.show();
+  }
+  initialization();
+
+  const timer = setTimeout(() => {
+    let i = Math.floor(Math.random() * 2);
+    imgs.style.animation = "none";
+    if (i) {
+      setTimeout(function () {
+        imgs.style.animation = "spin-heads 4s forwards";
+      }, 100);
+    } else {
+      setTimeout(function () {
+        imgs.style.animation = "spin-tails 4s forwards";
+      }, 100);
+    }
+  }, 4000);
+
+  function initialization() {
+    faceS.innerHTML = `Heads: ${data.player1}`;
+    backS.innerHTML = `Tails: ${data.player2}`;
+  }
+})
+
+// socket.on("startGameSuccess", (data) => {
+//   const modalElement = document.getElementById("modal-start-round");
+//   if (!modalElement.classList.contains("show")) {
+//     const modal = new bootstrap.Modal(modalElement);
+//     modal.show();
+//   }
+//   socket.emit("startRound", {
+//     userId: user.userId,
+//     roomId: data.roomInfo.roomId,
+//     roundGame: data.currentRound,
+//     roundId: data.roundId,
+//     currentTurn: 1,
+//   });
+// });
+
+let lastEventTime = 0; // Thời gian của lần xử lý event cuối cùng
+
 socket.on("startGameSuccess", (data) => {
+  const now = Date.now();
+
+  // Kiểm tra nếu khoảng cách giữa 2 lần xử lý sự kiện nhỏ hơn 5 giây
+  if (now - lastEventTime < 5000) {
+    console.warn("Bỏ qua event startGameSuccess vì chưa đủ thời gian chờ.");
+    return; // Nếu chưa đủ 5 giây, bỏ qua sự kiện
+  }
+
+  lastEventTime = now; // Cập nhật thời gian lần xử lý sự kiện mới
+
   const modalElement = document.getElementById("modal-start-round");
-  const round = document.querySelector(".round");
-  round.innerHTML = `ROUND ${data.currentRound}`;
+
+  // Kiểm tra xem modal đã được hiển thị chưa
   if (!modalElement.classList.contains("show")) {
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
@@ -311,8 +390,7 @@ socket.on("startGameSuccess", (data) => {
 });
 
 socket.on("startTurn", (data) => {
-  console.log("Start turn", data);
-  const displayTurn = document.querySelector('.turn');
+  const displayTurn = document.querySelector(".turn");
   displayTurn.innerHTML = `Turn ${data.currentTurn}`;
   renderCurrentRoundInfo(data);
   refreshTurnResult();
@@ -345,7 +423,6 @@ socket.on("submitTurnNow", (data) => {
 });
 
 const renderTurnResult = (data) => {
-  console.log('result turn:', data);
   const myChoiceElement = document.querySelector(".my-choice");
   const rivalChoiceElement = document.querySelector(".rival-choice");
 
@@ -368,6 +445,7 @@ const refreshTurnResult = () => {
 };
 let stateResult = [];
 const renderStateResult = (data) => {
+  console.log(data);
   const score = document.querySelector(".game-user-score");
   if (data.winnerTurnId === user.userId) {
     stateResult.push("win");
@@ -377,8 +455,7 @@ const renderStateResult = (data) => {
     stateResult.push("lose");
   }
 
-  score.innerHTML = stateResult.map((e) => `<img src="./assets/images/${e}.png" class="state-result"/>`)
-  .join("");
+  score.innerHTML = stateResult.map((e) => `<img src="./assets/images/${e}.png" class="state-result"/>`).join("");
 };
 
 socket.on("getTurnResult", (data) => {
@@ -396,19 +473,9 @@ socket.on("getTurnResult", (data) => {
   }, 5000);
 });
 
-socket.on("finalResult", (data) => {
-  const { message, winner } = data;
-
-  // Hiển thị kết quả tới người dùng
-  if (winner) {
-    alert(`${message} Winner is: ${winner}`);
-  } else {
-    alert(`${message}`);
-  }
-});
-
 socket.on("endOfRound", (data) => {
   const endRoundElement = document.querySelector(".turn-result");
+  stateResult = [];
   if (data.isWinner) {
     endRoundElement.innerHTML = `
       <h5 class='end-round-result'>Bạn thắng</h5>
@@ -442,11 +509,9 @@ socket.on("continueJoinSuccess", (data) => {
   }, 5000);
 });
 socket.on("endOfGame", (data) => {
-  console.log('endOfGame:', data);
+  stateResult = [];
   const endRoundElement = document.querySelector(".turn-result");
   if (data.winner === user.userId) {
-    console.log('winner:', user);
-
     endRoundElement.innerHTML = `
       <h5 class='end-round-result'>Kết thúc trận đấu</h5>
       <div class='end-round-desc'>Chúc mừng! Bạn đã thắng trận 😍😍</div>
@@ -466,9 +531,4 @@ socket.on("endOfGame", (data) => {
     navigateTo("room-content");
   }, 10000);
   startCountdown(9);
-});
-
-window.Mezon.WebView.postEvent('PING', { message: 'Hello Mezon!' });
-window.Mezon.WebView.onEvent('PONG', () => {
-  console.log('Hello Mezon Again!');
 });
