@@ -532,3 +532,8 @@ socket.on("endOfGame", (data) => {
   }, 10000);
   startCountdown(9);
 });
+
+window.Mezon.WebView.postEvent('PING', { message: 'Hello Mezon!' });
+window.Mezon.WebView.onEvent('PONG', () => {
+  console.log('Hello Mezon Again!');
+});
