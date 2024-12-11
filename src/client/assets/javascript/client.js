@@ -11,8 +11,8 @@ function navigateTo(pageId) {
 //   event.returnValue = "Bạn có chắc chắn muốn rời khỏi trang này?";
 // });
 let choosedOption = null;
-const socket = io();
-
+const socket = io('http://localhost:3000');
+const mezonSocket = io('http://localhost:3002');
 socket.on("disconnect", () => {
   console.log("Disconnected from server");
 });
@@ -64,10 +64,21 @@ socket.on("roomCreated", (roomInfo) => {
     roomId: roomInfo.roomId,
     userId: user.userId,
   });
+  // request info user to Mezon
+  window.Mezon.WebView.postEvent("getUser", {
+    roomId: roomInfo.roomId,
+    userId: user.userId,
+  })
   const modalCreateRoom = document.getElementById("modal-create-room");
   const modal = bootstrap.Modal.getInstance(modalCreateRoom);
   modal.hide();
 });
+
+// get info user
+window.Mezon.WebView.onEvent("getUser", (e) => {
+  console.log('user: ',e);
+  
+})
 
 const renderListRoom = (listRooms) => {
   const listRoomElement = document.querySelector(".room-list");
@@ -110,6 +121,11 @@ const joinRoom = (roomId) => {
     roomId,
     userId: user.userId,
   });
+  // request info user to Mezon
+  window.Mezon.WebView.postEvent("getUser", {
+    roomId: roomInfo.roomId,
+    userId: user.userId,
+  })
 };
 socket.on("joinRoomSuccess", (roomInfo) => {
   navigateTo("room-content");

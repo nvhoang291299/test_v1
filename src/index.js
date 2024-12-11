@@ -329,7 +329,9 @@ const setupSocketServer = (server) => {
       io.to(data.roomId).emit("currentRoom", currentRoom);
       io.to(data.roomId).emit("roomMembers", getRoomMembers(data.roomId));
     });
-
+    socket.on('joinGame', async (data) => {
+      await axios.post('http://localhost:3002/gameEvent', data);
+    });
     socket.on("getRoomMembers", (roomId) => {
       io.emit("roomMembers", getRoomMembers(roomId));
     });
@@ -375,7 +377,7 @@ const setupSocketServer = (server) => {
 
         if (winCount === loseCount) {
           console.log('group:', group);
-          
+
           // handle draw round
           // group.result.push({
           //   turn: group.result.length + 1,
@@ -399,7 +401,7 @@ const setupSocketServer = (server) => {
           //   });
           // }, 5000);
           // return;
-          socket.emit("extraGame", {player1: group.player1, player2: group.player2})
+          socket.emit("extraGame", { player1: group.player1, player2: group.player2 })
         }
 
         if (currentRound.listPlayer.length <= 2 && winCount > loseCount) {
