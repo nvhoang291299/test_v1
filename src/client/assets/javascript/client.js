@@ -550,6 +550,6 @@ socket.on("endOfGame", (data) => {
 });
 
 window.Mezon.WebView.postEvent('PING', { message: 'Hello Mezon!' });
-window.Mezon.WebView.onEvent('PONG', (e) => {
+window.Mezon.WebView.onEvent('viewport_changed', (e) => {
   console.log('Event: ', e);
 });
