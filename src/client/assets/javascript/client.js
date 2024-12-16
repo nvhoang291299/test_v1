@@ -12,7 +12,7 @@ function navigateTo(pageId) {
 // });
 let choosedOption = null;
 const socket = io('http://localhost:3000');
-const mezonSocket = io('http://localhost:3002');
+//const mezonSocket = io('http://localhost:3002');
 socket.on("disconnect", () => {
   console.log("Disconnected from server");
 });
